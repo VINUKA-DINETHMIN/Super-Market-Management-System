@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Container, Typography, IconButton, Dialog, DialogTitle, DialogContent, TextField, DialogActions, FormControl, InputLabel, Select, MenuItem, Chip, Avatar } from '@mui/material';
+import { Box, Container, Typography, IconButton, Dialog, DialogTitle, DialogContent, TextField, DialogActions, FormControl, InputLabel, Select, MenuItem, Chip } from '@mui/material';
 import Button from '@mui/material/Button';
 import Paper from '@mui/material/Paper';
 import Table from '@mui/material/Table';
@@ -18,7 +18,7 @@ import authAxios from '../../utils/authAxios';
 import { toast } from 'react-toastify';
 import Loader from '../../components/Loader/Loader';
 import { jsPDF } from 'jspdf';
-import { ForkRight } from '@mui/icons-material';
+import autoTable from 'jspdf-autotable'; // import jspdf-autotable library
 import { Check, Clear } from '@material-ui/icons';
 
 const Home = () => {
@@ -112,7 +112,7 @@ const Home = () => {
   }, []);
 
   const filteredItems = items.filter(item =>
-    item.itemName.toLowerCase().includes(searchQuery.toLowerCase())
+    item.itemName && item.itemName.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const generatePDF = () => {
@@ -124,94 +124,74 @@ const Home = () => {
     const pageWidth = doc.internal.pageSize.getWidth();
     const x = (pageWidth - textWidth) / 2;
 
-    // Function to add table content for each page
-    const addPageContent = (start, end) => {
-      const tableRows = [];
-      items.slice(start, end).forEach((row, index) => {
-        const rowData = [
-          row.itemName,
-          row.category,
-          row.quantity,
-          row.price,
-        ];
-        tableRows.push(rowData);
-      });
+    doc.text(x, 10, header);
 
-      doc.autoTable({
-        head: [['Name', 'Category', 'Quantity', 'Price']],
-        body: tableRows,
-        startY: 20,
-      });
-    };
+    // Add table content
+    const tableRows = [];
+    filteredItems.forEach((row) => {
+      const rowData = [
+        row.itemName,
+        row.category,
+        row.quantity,
+        row.price,
+      ];
+      tableRows.push(rowData);
+    });
 
-    let startRow = 0;
-    let endRow = rowsPerPage;
-
-    // Add pages until all rows are added
-    while (startRow < items.length) {
-      addPageContent(startRow, endRow);
-      startRow = endRow;
-      endRow = Math.min(startRow + rowsPerPage, items.length);
-      if (endRow < items.length) {
-        doc.addPage();
-      }
-    }
-
-    // Add Header to each page
-    for (let i = 1; i <= doc.getNumberOfPages(); i++) {
-      doc.setPage(i);
-      doc.text(x, 10, header);
-    }
+    doc.autoTable({
+      head: [['Name', 'Category', 'Quantity', 'Price']],
+      body: tableRows,
+      startY: 20,
+    });
 
     // Save the PDF
     doc.save('inventory.pdf');
   };
 
-
   return (
     <Container maxWidth={'800px'} style={{backgroundImage: 'url("https://www.shutterstock.com/image-photo/blur-warehouse-inventory-product-stock-600nw-1044779980.jpg")', backgroundSize: 'cover', backgroundRepeat: 'no-repeat', minHeight: '100vh'}}>
-    <WelcomeCardInventory />
-    <Box
-      sx={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        marginBottom: 4,
-        backgroundColor: '#FED8B1', // Shade of orange
-      }}
-    >
-      <InputBase
-        placeholder="  Search…"
-        sx={{ ml: 1, width: 200,backgroundColor: '#FFB645', border: '1px solid #ccc', borderRadius: 3 }}
-        onChange={handleSearchChange}
-      />
-      <IconButton sx={{ p: '10px', marginRight: 2 }} aria-label="search">
-        <SearchIcon />
-      </IconButton>
-      <Button 
-variant="outlined" 
-sx={{ 
-  marginRight: 2, 
-  color: '#FFFFFF', // Text color (white)
-  backgroundColor: '#4CAF50', // Background color (green)
-  '&:hover': { backgroundColor: '#388E3C' } // Hover background color (dark green)
-}} 
-component={Link} 
-to="/inventory/add-item"
->
-Add Item
-</Button>
-<Button 
-variant="outlined" 
-sx={{ 
-  color: '#FFFFFF', // Text color (white)
-  backgroundColor: '#0689FF', // Background color (blue)
-  '&:hover': { backgroundColor: '#0689FF' } // Hover background color (dark blue)
-}} 
-onClick={generatePDF}
->
-Generate PDF
-</Button>
+      <WelcomeCardInventory />
+      <Box
+        sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          marginBottom: 4,
+          backgroundColor: '#FED8B1', // Shade of orange
+        }}
+      >
+        <InputBase
+          placeholder="  Search…"
+          sx={{ ml: 1, width: 200,backgroundColor: '#FFB645', border: '1px solid #ccc', borderRadius: 3 }}
+          onChange={handleSearchChange}
+        />
+        <IconButton sx={{ p: '10px', marginRight: 2 }} aria-label="search">
+          <SearchIcon />
+        </IconButton>
+        <Button 
+          variant="outlined" 
+          sx={{ 
+            marginRight: 2, 
+            color: '#FFFFFF', // Text color (white)
+            backgroundColor: '#4CAF50', // Background color (green)
+            '&:hover': { backgroundColor: '#388E3C' } // Hover background color (dark green)
+          }} 
+          component={Link} 
+          to="/inventory/add-item"
+        >
+          Add Item
+        </Button>
+        <Button 
+          variant="outlined" 
+          sx={{ 
+            color: '#FFFFFF', // Text color (white)
+            backgroundColor: '#0689FF', // Background color (blue)
+            '&:hover': { backgroundColor: '#0689FF' } // Hover background color (dark blue)
+          }} 
+          onClick={generatePDF}
+        >
+          Generate PDF
+        </Button>
       </Box>
       <Paper sx={{ width: '100%', marginTop: 2, backgroundColor: 'rgba(255, 210, 200, 0.2)' }}> {/* Another shade of orange */} 
         {
@@ -219,7 +199,7 @@ Generate PDF
             <TableContainer sx={{ maxHeight: '100%' }}>
               <Table stickyHeader aria-label="sticky table">
                 <TableHead>
-                <TableRow>
+                  <TableRow>
                     <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Name</TableCell>
                     <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Category</TableCell>
                     <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '16px' }}>Quantity</TableCell>
@@ -231,7 +211,7 @@ Generate PDF
                 <TableBody>
                   {filteredItems.map((row) => (
                     <TableRow
-                      key={row.itemName}
+                      key={row._id}
                       sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
                       <TableCell align="center" sx={{ fontWeight: 'bold', fontSize: '14px' }} component="th" scope="row">
@@ -248,12 +228,12 @@ Generate PDF
                       <TableCell align="center">
                         <img
                           src={row.img}
-                          alt={row.productName}
+                          alt={row.itemName}
                           style={{ width: '35px', height: '35px', margin: 'auto' }}
                         />
                       </TableCell>
                       <TableCell align="center">
-                      <Button 
+                        <Button 
                           variant="outlined" 
                           sx={{ 
                             marginRight: 2, 
@@ -265,7 +245,6 @@ Generate PDF
                         >
                           Update
                         </Button>
-
                         <Button 
                           variant="outlined" 
                           sx={{ 
@@ -293,7 +272,6 @@ Generate PDF
             />
           </> : <Loader />}
       </Paper>
-
       <Dialog open={openUpdateDialog} onClose={handleDialogClose}>
         <DialogTitle>Update Item</DialogTitle>
         <DialogContent>
