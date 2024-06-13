@@ -12,7 +12,7 @@ import IconButton from '@mui/material/IconButton';
 import Badge from '@mui/material/Badge';
 import Container from '@mui/material/Container';
 import Button from '@mui/material/Button';
-import StickyFooter from '../../components/Footer/StickyFooter'
+import StickyFooter from '../../components/Footer/StickyFooter';
 import MenuIcon from '@mui/icons-material/Menu';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import Avatar from '@mui/material/Avatar';
@@ -25,7 +25,8 @@ import { Outlet, useNavigate } from 'react-router-dom';
 import Menu from '@mui/material/Menu';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
-import logoImage from '../../assets/logoImage.png';
+import logoImage from '../../assets/logo1.jpg';
+import backgroundImage from '../../assets/2.jpg'; // Add your background image path here
 
 const drawerWidth = 240;
 
@@ -53,6 +54,7 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
       position: 'relative',
       whiteSpace: 'nowrap',
       width: drawerWidth,
+      backgroundColor: theme.palette.secondary.main, // Set the background color for the navigation bar
       transition: theme.transitions.create('width', {
         easing: theme.transitions.easing.sharp,
         duration: theme.transitions.duration.enteringScreen,
@@ -102,11 +104,21 @@ export function stringAvatar(name) {
   };
 }
 
-// TODO remove, this demo shouldn't need to reset the theme.
-const defaultTheme = createTheme();
+const customTheme = createTheme({
+  palette: {
+    background: {
+      default: '#f0f0f0', // Background color
+    },
+    primary: {
+      main: '#0194e1', // AppBar color
+    },
+    secondary: {
+      main: '#7cdef0', // Drawer color
+    },
+  },
+});
 
 export default function Dashboard() {
-
   const navigate = useNavigate();
   const [navLinks, setNavlinks] = useState(guestListItems);
   const { logout, userRole } = useAuth();
@@ -137,76 +149,75 @@ export default function Dashboard() {
       case "admin": //Admin
         setNavlinks(adminListItems);
         if (userAPI != null) {
-          setuserAPI('admin')
+          setuserAPI('admin');
           setAuth(true);
         }
         break;
       case "customer":
         if (userAPI != null) {
-          setuserAPI('customer')
+          setuserAPI('customer');
           setAuth(true);
         }
         setNavlinks(customerListItems);
         break;
       case "inventory": //Support
         if (userAPI != null) {
-          setuserAPI('inventory')
+          setuserAPI('inventory');
           setAuth(true);
         }
         setNavlinks(inventoryListItems);
         break;
       case "order": //Support
         if (userAPI != null) {
-          setuserAPI('order')
+          setuserAPI('order');
           setAuth(true);
         }
         setNavlinks(orderListItems);
         break;
       case "supplier": //Support
         if (userAPI != null) {
-          setuserAPI('supplier')
+          setuserAPI('supplier');
           setAuth(true);
         }
         setNavlinks(supplierListItems);
         break;
       case "news": //Support
         if (userAPI != null) {
-          setuserAPI('news')
+          setuserAPI('news');
           setAuth(true);
         }
         setNavlinks(newsListItems);
         break;
       case "delivery": //Support
         if (userAPI != null) {
-          setuserAPI('delivery')
+          setuserAPI('delivery');
           setAuth(true);
         }
         setNavlinks(deliveryListItems);
         break;
       case "driver": //driver
         if (userAPI != null) {
-          setuserAPI('driver')
+          setuserAPI('driver');
           setAuth(true);
         }
         setNavlinks(driverListItems);
         break;
       case "staff": //staff
         if (userAPI != null) {
-          setuserAPI('staff')
+          setuserAPI('staff');
           setAuth(true);
         }
-        case "feedback": //feedback
+      case "feedback": //feedback
         if (userAPI != null) {
-          setuserAPI('feedback')
+          setuserAPI('feedback');
           setAuth(true);
         }
         setNavlinks(staffListItems);
         break;
       default:
-        setNavlinks(guestListItems)
+        setNavlinks(guestListItems);
         navigate("/");
     }
-
   }, []);
 
   const getUserDetails = async () => {
@@ -224,11 +235,11 @@ export default function Dashboard() {
   };
 
   useEffect(() => {
-    getUserDetails()
+    getUserDetails();
   }, []);
 
   return (
-    <ThemeProvider theme={defaultTheme}>
+    <ThemeProvider theme={customTheme}>
       <Box sx={{ display: 'flex' }}>
         <CssBaseline />
         <AppBar position="absolute" open={open}>
@@ -264,7 +275,7 @@ export default function Dashboard() {
                       userRole === 'news' ? 'News Manager Dashboard' :
                         userRole === 'delivery' ? 'Delivery Manager Dashboard' :
                           userRole === 'order' ? 'Order Manager Dashboard' :
-                            'Crisp Cabinet'}
+                            'Trizzen Super'}
             </Typography>
 
             {auth ? (
@@ -331,17 +342,14 @@ export default function Dashboard() {
           <Divider />
           <List component="nav">
             {navLinks}
-            {/* <Divider sx={{ my: 1 }} />
-            {secondaryListItems} */}
           </List>
         </Drawer>
         <Box
           component="main"
           sx={{
-            backgroundColor: (theme) =>
-              theme.palette.mode === 'light'
-                ? theme.palette.grey[100]
-                : theme.palette.grey[900],
+            backgroundColor: (theme) => theme.palette.background.default,
+            backgroundImage: `url(${backgroundImage})`, // Add the background image
+            backgroundSize: 'cover', // Ensure the image covers the entire area
             flexGrow: 1,
             height: '100vh',
             overflow: 'auto',
