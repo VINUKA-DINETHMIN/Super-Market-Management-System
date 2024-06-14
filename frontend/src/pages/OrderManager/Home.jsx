@@ -206,7 +206,7 @@ const Home = () => {
                   <TableCell align="center">Order ID</TableCell>
                   <TableCell align="center">Customer Name</TableCell>
                   <TableCell align="center">Placed Date</TableCell>
-                  <TableCell align="center">Total Price</TableCell>
+                 
                   <TableCell align="center">Payment Details</TableCell>
                   <TableCell align="center">Action</TableCell>
                 </TableRow>
@@ -220,7 +220,7 @@ const Home = () => {
                     <TableCell align="center">{index + 1}</TableCell>
                     <TableCell align="center">{row.userId ? `${row.userId.firstName} ${row.userId.lastName}` : 'Unknown'}</TableCell>
                     <TableCell align="center">{new Date(row.createdAt).toLocaleDateString()}</TableCell>
-                    <TableCell align="center">{row.price}</TableCell>
+                   
                     <TableCell align="center" onClick={() => { handleClickOpen(row) }} className="cursor-pointer"><Visibility /></TableCell>
                     <TableCell align="center">
                       <ToggleButtonGroup
