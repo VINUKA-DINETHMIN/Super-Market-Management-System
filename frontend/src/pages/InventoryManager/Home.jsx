@@ -114,7 +114,8 @@ const Home = () => {
   const filteredItems = items.filter(item =>
     item.itemName && item.itemName.toLowerCase().includes(searchQuery.toLowerCase())
   );
-
+  
+    //PDF PART START
   const generatePDF = () => {
     const doc = new jsPDF();
 
