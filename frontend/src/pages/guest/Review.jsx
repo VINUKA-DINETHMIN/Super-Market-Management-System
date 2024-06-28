@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from 'react';
 import Accordion from '@mui/material/Accordion';
 import AccordionDetails from '@mui/material/AccordionDetails';
 import AccordionSummary from '@mui/material/AccordionSummary';
@@ -12,16 +13,15 @@ import DialogTitle from '@mui/material/DialogTitle';
 import { useAuth } from '../common/AuthContext';
 import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
-import React, { useEffect, useState } from 'react';
 import { apiUrl } from '../../utils/Constants';
 import authAxios from '../../utils/authAxios';
 import { toast } from 'react-toastify';
 
 export default function Review() {
-  const [expanded, setExpanded] = React.useState(false);
-  const [value, setValue] = React.useState(2);
-  const [open, setOpen] = React.useState(false);
-  const [open2, setOpen2] = React.useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [value, setValue] = useState(2);
+  const [open, setOpen] = useState(false);
+  const [open2, setOpen2] = useState(false);
   const { userRole } = useAuth();
   const [isLoading, setIsLoading] = useState(true);
   const [reviews, setReviews] = useState([]);
@@ -50,10 +50,8 @@ export default function Review() {
     setFormData((prevData) => ({ ...prevData, [field]: value }));
   };
 
-  // Function to handle closing dialogs
   const handleDialogClose = () => {
     setOpen(false);
-    // setOpenUpdateDialog(false);
     setFormData({
       rate: '',
       review: '',
@@ -69,7 +67,6 @@ export default function Review() {
       getReviews();
       setOpen(false);
     } catch (error) {
-      //console.log(error);
       toast.error(error.response.data.message);
     }
   };
@@ -79,7 +76,7 @@ export default function Review() {
       const result = await authAxios.put(`${apiUrl}/review/${updateFormData._id}`, updateFormData);
       if (result) {
         getReviews();
-        handleClose2()
+        handleClose2();
         toast.success('User Updated Successfully');
         handleDialogClose();
       }
@@ -91,7 +88,6 @@ export default function Review() {
   const handleDeleteUser = async (id) => {
     try {
       const result = await authAxios.delete(`${apiUrl}/review/${id}`);
-
       if (result) {
         getReviews();
         toast.warning('Review Deleted Successfully');
@@ -107,10 +103,8 @@ export default function Review() {
     try {
       const res = await authAxios.get(`${apiUrl}/review`);
       setReviews(res.data.Data);
-      console.log(res.data.Data)
       setIsLoading(false);
     } catch (error) {
-      console.error(error);
       if (error.response && error.response.status === 404) {
         toast.error('Products not found');
       } else {
@@ -125,11 +119,10 @@ export default function Review() {
       setUser(response.data);
       setIsLoading(false);
     } catch (error) {
-      console.error(error);
       if (error.response && error.response.status === 404) {
-        toast.error('user profile not found.');
+        toast.error('User profile not found.');
       } else {
-        // toast.error(error.response?.data?.message || 'An error occurred');
+        toast.error(error.response?.data?.message || 'An error occurred');
       }
     }
   };
@@ -157,7 +150,6 @@ export default function Review() {
 
   return (
     <div>
-
       <Typography variant="h4" gutterBottom className='text-center'>
         Review & Feedback
       </Typography>
@@ -183,52 +175,44 @@ export default function Review() {
           {"Publish Review"}
         </DialogTitle>
         <DialogContent>
-
           <Typography component="legend">Email</Typography>
           <TextField fullWidth value={user.email} id="email" disabled />
-
           <Typography component="legend">Rate</Typography>
           <Rating
             name="simple-controlled"
-            value={formData.rate} onChange={(e) => handleCreateUser('rate', e.target.value)}
+            value={Number(formData.rate)}  // Ensure the value is a number
+            onChange={(e) => handleCreateUser('rate', e.target.value)}
           />
-
           <Typography component="legend">Feedback</Typography>
-
           <TextField
             id="outlined-multiline-static"
             multiline
             rows={4}
             fullWidth
-            value={formData.review} onChange={(e) => handleCreateUser('review', e.target.value)}
+            value={formData.review} 
+            onChange={(e) => handleCreateUser('review', e.target.value)}
           />
-
         </DialogContent>
-
         <DialogActions>
-          <Button onClick={() => { handleSubmit() }}>Publish</Button>
-          <Button onClick={handleClose} autoFocus>
-            Cancel
-          </Button>
+          <Button onClick={handleSubmit}>Publish</Button>
+          <Button onClick={handleClose} autoFocus>Cancel</Button>
         </DialogActions>
       </Dialog>
       {reviews.map((review, index) => (
-        <Accordion expanded={expanded === index} onChange={handleChange(index)}>
+        <Accordion expanded={expanded === index} onChange={handleChange(index)} key={review._id}>
           <AccordionSummary
             expandIcon={<ExpandMoreIcon />}
             aria-controls="panel1bh-content"
             id="panel1bh-header"
           >
             <Typography sx={{ width: '33%', flexShrink: 0 }}>
-            {review.userId ? `${review.userId.firstName} ${review.userId.lastName}` : 'N/A'}
+              {review.userId ? `${review.userId.firstName} ${review.userId.lastName}` : 'N/A'}
             </Typography>
             <Rating name="disabled" value={review.rate} disabled />
           </AccordionSummary>
           <AccordionDetails>
-            <Typography>
-              {review.review}
-            </Typography>
-            {user._id == review.userId._id && (
+            <Typography>{review.review}</Typography>
+            {user._id === review.userId?._id && (
               <div disableSpacing className='text-right'>
                 <IconButton aria-label="add to favorites" onClick={() => handleUpdateUser(review)}>
                   <EditIcon />
@@ -240,7 +224,6 @@ export default function Review() {
             )}
           </AccordionDetails>
         </Accordion>
-
       ))}
       <Dialog
         open={open2}
@@ -259,35 +242,25 @@ export default function Review() {
           {"Update Review"}
         </DialogTitle>
         <DialogContent>
-
-          <Typography component="legend">Email</Typography>
-          <TextField fullWidth value={user.email} id="email" disabled />
-
           <Typography component="legend">Rate</Typography>
           <Rating
             name="simple-controlled"
-            onChange={(e) => setUpdateFormData({ ...updateFormData, rate: e.target.value })}
             value={updateFormData.rate}
+            onChange={(e) => setUpdateFormData({ ...updateFormData, rate: e.target.value })}
           />
-
           <Typography component="legend">Feedback</Typography>
-
           <TextField
             id="outlined-multiline-static"
             multiline
             rows={4}
             fullWidth
+            value={updateFormData.review} 
             onChange={(e) => setUpdateFormData({ ...updateFormData, review: e.target.value })}
-            value={updateFormData.review}
           />
-
         </DialogContent>
-
         <DialogActions>
-          <Button onClick={handleUpdate}>Publish</Button>
-          <Button onClick={handleClose2} autoFocus>
-            Cancel
-          </Button>
+          <Button onClick={handleUpdate}>Update</Button>
+          <Button onClick={handleClose2} autoFocus>Cancel</Button>
         </DialogActions>
       </Dialog>
     </div>
