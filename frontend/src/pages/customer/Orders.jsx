@@ -79,7 +79,7 @@ export default function Orders() {
   const handleGeneratePDF = () => {
     const doc = new jsPDF();
     // Header
-    const header = [['Id', 'Date', 'Price', 'Driver', 'Status']];
+    const header = [['Id', 'Date',  'Driver', 'Status']];
     // Data
     const data = orders.map((orders, index) => [
       orders._id,
@@ -136,10 +136,7 @@ export default function Orders() {
                     class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Date
                   </th>
-                  <th
-                    class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Price
-                  </th>
+                  
                   <th
                     class="px-5 py-3 border-b-2 border-gray-200 bg-gray-100 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                     Driver
@@ -172,11 +169,7 @@ export default function Orders() {
                           {new Date(orders.createdAt).toLocaleDateString()}
                         </p>
                       </td>
-                      <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
-                        <p class="text-gray-900 whitespace-no-wrap">
-                          {orders.price}
-                        </p>
-                      </td>
+                      
                       <td class="px-5 py-5 border-b border-gray-200 bg-white text-sm">
                         <p class="text-gray-900 whitespace-no-wrap">
                           {orders.driverId ? `${orders.driverId.firstName} ${orders.driverId.lastName}` : 'N/A'}
