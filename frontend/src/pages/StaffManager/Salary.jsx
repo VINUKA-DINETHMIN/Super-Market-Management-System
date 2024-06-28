@@ -9,7 +9,6 @@ import { toast } from 'react-toastify';
 import authAxios from '../../utils/authAxios';
 import jsPDF from 'jspdf';
 import { DialogActions, DialogContent, DialogTitle } from '@mui/material';
-import { Delete } from '@mui/icons-material';
 import Card from '@mui/material/Card';
 import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
@@ -43,7 +42,7 @@ export default function Salary() {
     setOpenUpdateDialog(true);
     setUpdateFormData({
       _id: row._id,
-      userId: row.userId,
+      userId: row.userId?._id, // Safe navigation to prevent null errors
       basic: row.basic,
       attendanceAllowance: row.attendanceAllowance,
       fuelAllowance: row.fuelAllowance,
@@ -68,15 +67,15 @@ export default function Salary() {
   const handleGeneratePDF = () => {
     const doc = new jsPDF();
     // Header
-    const header = [['Name', 'Basic', 'Attendance Allowance', 'FuelAllowance', 'Overtime', 'Total Salary']];
+    const header = [['Name', 'Basic', 'Attendance Allowance', 'Fuel Allowance', 'Overtime', 'Total Salary']];
     // Data
-    const data = salaries.map((salary, index) => [
-      salary.userId.firstName,
-      salary.basic,
-      salary.attendanceAllowance,
-      salary.fuelAllowance,
-      salary.overtime,
-      salary.totalSalary,
+    const data = salaries.map((salary) => [
+      `${salary.userId?.firstName} ${salary.userId?.lastName}`, // Safe navigation to prevent null errors
+      salary.basic.toFixed(2),
+      salary.attendanceAllowance.toFixed(2),
+      salary.fuelAllowance.toFixed(2),
+      salary.overtime.toFixed(2),
+      salary.totalSalary.toFixed(2),
     ]);
     // Set font size and align center in width
     doc.setFontSize(12);
@@ -98,6 +97,7 @@ export default function Salary() {
       setSalaries(response.data);
     } catch (error) {
       console.error('Error fetching salaries:', error);
+      toast.error('Failed to fetch salaries');
     }
   };
 
@@ -107,6 +107,7 @@ export default function Salary() {
       setUsers(response.data);
     } catch (error) {
       console.error('Error fetching users:', error);
+      toast.error('Failed to fetch users');
     }
   };
 
@@ -128,7 +129,7 @@ export default function Salary() {
         handleDialogClose();
       }
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || 'Failed to update salary');
     }
   };
 
@@ -140,21 +141,20 @@ export default function Salary() {
         toast.warning('Deleted Successfully');
       }
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || 'Failed to delete salary');
     }
   };
 
   const handleSubmit = async () => {
-    console.log(formData);
     try {
-      const result = await authAxios.post(`${apiUrl}/salary`, formData)
+      const result = await authAxios.post(`${apiUrl}/salary`, formData);
       if (result) {
         toast.success("Salary created successfully!");
         setOpenDialog(false);
+        fetchSalaries();
       }
-      fetchSalaries();
     } catch (error) {
-      toast.error(error.response.data.message);
+      toast.error(error.response?.data?.message || 'Failed to create salary');
     }
   };
 
@@ -162,13 +162,12 @@ export default function Salary() {
     setFormData((prevData) => ({ ...prevData, [field]: value }));
   };
 
-
   return (
-    <div className="flex flex-col items-center" style={{ backgroundColor: '#C1E1C1', minHeight: '100vh' }}>
+    <div className="flex flex-col items-center" style={{ backgroundColor: '#C1E1C1', minHeight: '100vh', padding: '20px' }}>
       <h2 className="text-xl font-bold mb-4">Salary Details</h2>
-      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Button variant="contained" style={{ marginBottom: '20px', marginRight: '50px', backgroundColor: '#009E60', color: '#fff' }} onClick={handleDialogOpen}>Create Salary</Button>
-        <Button variant="contained" color="primary" style={{ marginBottom: '20px', backgroundColor: '#009E60', color: '#fff' }} onClick={handleGeneratePDF}>Generate PDF</Button>
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '20px', width: '100%' }}>
+        <Button variant="contained" style={{ backgroundColor: '#009E60', color: '#fff' }} onClick={handleDialogOpen}>Create Salary</Button>
+        <Button variant="contained" color="primary" style={{ backgroundColor: '#009E60', color: '#fff' }} onClick={handleGeneratePDF}>Generate PDF</Button>
       </div>
 
       <Dialog open={openDialog} onClose={handleDialogClose}>
@@ -228,7 +227,7 @@ export default function Salary() {
           <Card key={salary._id} className="m-2" style={{ backgroundColor: '#fff', border: '2px solid #009E60', maxWidth: '300px' }}>
             <CardContent>
               <div>
-                <strong>User Name:</strong> {salary.userId.firstName} {salary.userId.lastName}
+                <strong>User Name:</strong> {salary.userId?.firstName} {salary.userId?.lastName}
               </div>
               <div>
                 <strong>Basic:</strong> {salary.basic.toFixed(2)}
@@ -246,6 +245,7 @@ export default function Salary() {
                 <strong>Total Salary:</strong> {salary.totalSalary.toFixed(2)}
               </div>
             </CardContent>
+
             <CardActions>
               <Button variant="contained" color="primary" style={{ backgroundColor: '#009E60', color: '#fff' }} className="mr-2" onClick={() => handleUpdateUser(salary)}>Update</Button>
               <Button variant="contained" color="error" onClick={() => handleDelete(salary._id)}>Delete</Button>
