@@ -26,7 +26,7 @@ import Menu from '@mui/material/Menu';
 import Tooltip from '@mui/material/Tooltip';
 import MenuItem from '@mui/material/MenuItem';
 import logoImage from '../../assets/logo1.jpg';
-import backgroundImage from '../../assets/2.jpg'; // Add your background image path here
+//import backgroundImage from '../../assets/2.jpg'; // Add your background image path here
 
 const drawerWidth = 240;
 
@@ -348,7 +348,7 @@ export default function Dashboard() {
           component="main"
           sx={{
             backgroundColor: (theme) => theme.palette.background.default,
-            backgroundImage: `url(${backgroundImage})`, // Add the background image
+            //backgroundImage: `url(${backgroundImage})`, // Add the background image
             backgroundSize: 'cover', // Ensure the image covers the entire area
             flexGrow: 1,
             height: '100vh',
